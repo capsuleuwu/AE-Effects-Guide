@@ -122,7 +122,7 @@ footer{color:var(--mute);font-size:8px;text-align:center;padding:32px 20px 44px;
 .x:hover{color:var(--txt)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel2);border:1px solid #2c4e72;color:var(--ae);padding:6px 14px;border-radius:7px;font-size:13px;opacity:0;transition:.2s;z-index:80;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
-@media (max-width:720px){footer{padding-left:6px;padding-right:6px;-webkit-text-size-adjust:100%;text-size-adjust:100%}footer .dsk{display:none}footer .mob{display:inline}.fl1{white-space:nowrap;font-size:min(8px,2.02vw);letter-spacing:-.1px}.mside{height:var(--msh,312px)}.msin{padding:12px 14px;gap:6px}.mside .row{flex-wrap:nowrap;gap:6px}.mside .row .btn{padding:0 9px;font-size:12.5px;white-space:nowrap}.ctrl{padding:8px 10px;gap:8px}.mask{align-items:flex-start;padding-top:max(41px,env(safe-area-inset-top))}.toggles{width:100%}.toggles .tg{flex:1;justify-content:center}.modal{grid-template-columns:1fr}.modal .big{border-right:0}.search{width:100%}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:8px}}
+@media (max-width:720px){#zoomBtn{display:none}footer{padding-left:6px;padding-right:6px;-webkit-text-size-adjust:100%;text-size-adjust:100%}footer .dsk{display:none}footer .mob{display:inline}.fl1{white-space:nowrap;font-size:min(8px,2.02vw);letter-spacing:-.1px}.mside{height:var(--msh,312px)}.msin{padding:12px 14px;gap:6px}.mside .row{flex-wrap:nowrap;gap:6px}.mside .row .btn{padding:0 9px;font-size:12.5px;white-space:nowrap}.ctrl{padding:8px 10px;gap:8px}.mask{align-items:flex-start;padding-top:max(41px,env(safe-area-inset-top))}.toggles{width:100%}.toggles .tg{flex:1;justify-content:center}.modal{grid-template-columns:1fr}.modal .big{border-right:0}.search{width:100%}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:8px}}
 </style>
 </head>
 <body>
@@ -139,6 +139,7 @@ footer{color:var(--mute);font-size:8px;text-align:center;padding:32px 20px 44px;
       <div class="toggles">
         <button class="tg" id="hotBtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.83 5.73 6.32.92-4.57 4.46 1.08 6.3L12 17.24l-5.66 2.97 1.08-6.3-4.57-4.46 6.32-.92z" fill="currentColor"/></svg>我的收藏 <span class="n" id="favN">0</span></button>
         <button class="tg" id="autoBtn">▶ 自動播放</button>
+        <button class="tg" id="zoomBtn" title="切換顯示比例"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M10.5 7.5v6M7.5 10.5h6"/></svg><span id="zoomTxt">放大顯示</span></button>
       </div>
     </div>
     <div class="catbar"><button class="arrow" id="catL" aria-label="向左"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><nav class="cats" id="cats"></nav><button class="arrow" id="catR" aria-label="向右"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
@@ -1201,7 +1202,13 @@ const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function hl(s,q){s=esc(s);if(!q)return s;const i=s.toLowerCase().indexOf(q.toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+q.length)+'</mark>'+s.slice(i+q.length)}
 let shown=[],cards=[];
 // 縮圖解析度：依螢幕像素密度決定，讓預覽清晰
-const CVW=Math.round(clamp(260*(devicePixelRatio||1),260,480)/16)*16;
+// 顯示比例：標準 100%／放大 150%（記在這台裝置的瀏覽器）
+const ZKEY='ae-effects-zoom';let ZOOM=1;try{ZOOM=+localStorage.getItem(ZKEY)===1.5?1.5:1}catch(e){}
+const isMobile=()=>matchMedia('(max-width:720px)').matches;
+function applyZoom(){const z=isMobile()?1:ZOOM;document.documentElement.style.zoom=z===1?'':z;
+  const b=document.getElementById('zoomBtn');if(b){b.classList.toggle('on',ZOOM===1.5);document.getElementById('zoomTxt').textContent=ZOOM===1.5?'標準顯示':'放大顯示'}
+  CVW=Math.round(clamp(260*(devicePixelRatio||1)*z,260,720)/16)*16}
+let CVW=260;applyZoom();
 const io=new IntersectionObserver(es=>es.forEach(e=>{const c=e.target;c._vis=e.isIntersecting;if(e.isIntersecting&&!c._drawn){c._drawn=1;render(c._cv,c._fx,isTrans(c._fx)?.5:.75,.15)}}),{rootMargin:'200px'});
 function buildList(){const list=$('#list');list.innerHTML='';cards.forEach(c=>io.unobserve(c));cards=[];
   const q=state.q.trim().toLowerCase();
@@ -1248,6 +1255,7 @@ $('#mFav').onclick=()=>toggleFav(shown[modal.i]);
 $('#copyEn').onclick=()=>copy(shown[modal.i][1]);$('#copyZh').onclick=()=>copy(shown[modal.i][2]);
 // 搜尋/切換
 let qt;$('#q').oninput=e=>{clearTimeout(qt);qt=setTimeout(()=>{state.q=e.target.value;buildList()},120)};
+$('#zoomBtn').onclick=()=>{ZOOM=ZOOM===1.5?1:1.5;try{localStorage.setItem(ZKEY,ZOOM)}catch(e){}applyZoom();buildList();window._catSync&&_catSync()};
 $('#hotBtn').onclick=()=>{state.hot=!state.hot;$('#hotBtn').classList.toggle('hoton',state.hot);state.cat='all';buildCats();$('#cats').scrollLeft=0;buildList();window._catSync&&_catSync()};
 $('#autoBtn').onclick=()=>{state.auto=!state.auto;$('#autoBtn').classList.toggle('on',state.auto);$('#autoBtn').textContent=state.auto?'⏸ 停止播放':'▶ 自動播放';
   if(!state.auto)cards.forEach(c=>{if(c._vis)render(c._cv,c._fx,isTrans(c._fx)?.5:.75,.15)})};
