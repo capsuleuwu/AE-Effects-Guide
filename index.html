@@ -75,13 +75,13 @@ section.cat h2 i{margin-left:auto;font:11px var(--mono);font-style:normal;color:
 .cv .badge{position:absolute;left:6px;top:6px;font:600 10px var(--mono);background:rgba(20,21,24,.8);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--mute)}
 .fav{position:absolute;right:5px;top:5px;width:26px;height:26px;padding:0;border-radius:6px;border:1px solid transparent;background:rgba(20,21,24,.75);color:#c9ccd2;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
 .ico{width:15px;height:15px;display:block;flex:none}
-.btn,.tg{display:inline-flex;align-items:center;gap:6px}
+.btn,.tg{display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .fav.on{opacity:1}
 @media (hover:hover){.card:hover .fav{opacity:1}}
 @media (hover:none){.fav{opacity:.85}.cv .play{display:none}}
 .fav:hover{border-color:#5b4521;color:var(--hot)}
 .fav.on{color:var(--hot);border-color:#5b4521;background:#2d2416}
-.btn.favon{color:var(--hot);border-color:#5b4521;background:#2d2416}
+.btn.favon{color:var(--ae);border-color:#2c4e72;background:#182637}
 .tg .n{font:11px var(--mono);background:var(--bg);padding:0 6px;border-radius:10px;color:var(--mute)}
 .tg.hoton .n{color:var(--hot)}
 .cv .play{position:absolute;right:6px;bottom:6px;font-size:10.5px;background:rgba(20,21,24,.8);border-radius:4px;padding:0 6px;color:var(--mute)}
@@ -167,7 +167,7 @@ footer{color:var(--mute);font-size:8px;text-align:center;padding:32px 20px 44px;
       <p id="mDesc"></p>
       <div class="note" id="mNote"></div>
       <div class="row" style="margin-top:auto">
-        <button class="btn pri" id="copyEn">複製英文名稱</button>
+        <button class="btn" id="copyEn">複製英文名稱</button>
         <button class="btn" id="copyZh">複製中文名稱</button>
         <button class="btn" id="mFav">☆ 加入收藏</button>
       </div>
@@ -1239,7 +1239,7 @@ requestAnimationFrame(loop);
 const modal={open:false,i:0,t:0,last:0,playing:true,autoK:true};
 function openModal(i){modal.i=(i+shown.length)%shown.length;const f=shown[modal.i],c=catName(f[0]);modal.open=true;modal.last=performance.now();
   $('#mPath').textContent=`效果 › ${c[1]} (${c[2]})`;$('#mEn').textContent=f[1];$('#mZh').textContent=f[2];$('#mDesc').textContent=f[3];showNote(f);
-  syncModalFav();$('#mask').classList.add('show');$('#amt').previousElementSibling.textContent=isTrans(f)?'轉場進度':'強度';}
+  syncModalFav();resetCopyBtns();$('#mask').classList.add('show');$('#amt').previousElementSibling.textContent=isTrans(f)?'轉場進度':'強度';}
 function showNote(f){const n=NOTES[f[1]],el=$('#mNote');if(!n){el.style.display='none';return}
   el.style.display='block';el.className='note '+n[0];el.innerHTML=`<b>${n[0]===SOLID?'需要純色圖層 Solid':'建議使用空物件 Null'}</b><span>${esc(n[1])}</span>`}
 function syncModalFav(){const f=shown[modal.i],b=$('#mFav');b.classList.toggle('favon',isFav(f));b.innerHTML=STAR(isFav(f))+(isFav(f)?'已收藏':'加入收藏')}
@@ -1252,7 +1252,10 @@ $('#amt').oninput=()=>setAutoK(false);$('#mAuto').onclick=()=>setAutoK(!modal.au
 function toast(s){const t=$('#toast');t.textContent=s;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),1400)}
 async function copy(s){try{await navigator.clipboard.writeText(s);toast('已複製：'+s)}catch(e){toast('無法存取剪貼簿，請手動選取複製')}}
 $('#mFav').onclick=()=>toggleFav(shown[modal.i]);
-$('#copyEn').onclick=()=>copy(shown[modal.i][1]);$('#copyZh').onclick=()=>copy(shown[modal.i][2]);
+// 複製按鈕：按下後亮起並顯示「已複製」，1.5 秒後恢復
+function flashBtn(b,label){clearTimeout(b._t);if(!b._t)b.style.minWidth=b.offsetWidth+'px';b.classList.add('pri');b.textContent='✓ 已複製';b._t=setTimeout(()=>{b._t=0;b.style.minWidth='';b.classList.remove('pri');b.textContent=label},1500)}
+function resetCopyBtns(){[['#copyEn','複製英文名稱'],['#copyZh','複製中文名稱']].forEach(([id,l])=>{const b=$(id);clearTimeout(b._t);b._t=0;b.style.minWidth='';b.classList.remove('pri');b.textContent=l})}
+$('#copyEn').onclick=()=>{copy(shown[modal.i][1]);flashBtn($('#copyEn'),'複製英文名稱')};$('#copyZh').onclick=()=>{copy(shown[modal.i][2]);flashBtn($('#copyZh'),'複製中文名稱')};
 // 搜尋/切換
 let qt;$('#q').oninput=e=>{clearTimeout(qt);qt=setTimeout(()=>{state.q=e.target.value;buildList()},120)};
 let zt,lastCVW=CVW;addEventListener('resize',()=>{clearTimeout(zt);zt=setTimeout(()=>{applyZoom();if(Math.abs(CVW-lastCVW)>=64){lastCVW=CVW;buildList()}window._catSync&&_catSync()},150)});
