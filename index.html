@@ -6,13 +6,15 @@
 <title>AE 內建特效圖鑑｜中英對照動態預覽</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#141518;--panel:#1d1f23;--panel2:#25282d;--line:#33373d;--txt:#dde0e5;--mute:#8d939c;
   --ae:#4ea4f2;--sel:#21364f;--hot:#f2a640;--r:8px;
-  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
-  --mono:"JetBrains Mono","SFMono-Regular",Consolas,"Noto Sans TC",monospace;
+  /* 中文直接用系統內建字型（Mac/iPhone：蘋方，Windows：微軟正黑體），不用等網路字型下載 */
+  --body:"PingFang TC","Microsoft JhengHei UI","Microsoft JhengHei","Noto Sans CJK TC","Noto Sans TC",system-ui,sans-serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Menlo,Consolas,"PingFang TC","Microsoft JhengHei",monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
